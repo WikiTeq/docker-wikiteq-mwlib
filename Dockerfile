@@ -4,7 +4,11 @@ FROM python:2.7-slim
 ENV PYTHONUNBUFFERED=1
 
 # Install prerequisite packages needed for mwlib
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update  \
+    && mkdir -p /usr/share/man/man1 \
+    && apt-get install -y --no-install-recommends \
+    ca-certificates-java \
+    default-jre-headless \
     build-essential \
     python3-dev \
     libxml2-dev \

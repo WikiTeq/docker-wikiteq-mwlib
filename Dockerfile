@@ -1,4 +1,4 @@
-FROM python:2.7-slim
+FROM python:3.13-slim
 
 # Ensures Python output is sent straight to the terminal (no buffering)
 ENV PYTHONUNBUFFERED=1

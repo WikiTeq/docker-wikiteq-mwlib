@@ -58,7 +58,7 @@ jobs:
           BDATE=$(date +%Y%m%d)
 
           # Extract mwlib version from Dockerfile
-          MWLIB_VERSION=$(sed -nr 's/mwlib==([0-9\.]+)/\1/p' Dockerfile | sed "s/ \\\//" | sed "s/\t//")
+          MWLIB_VERSION=$(sed -nr 's/.*mwlib==([0-9\.]+).*/\1/p' Dockerfile)
 
           # Change all uppercase to lowercase, just in case
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')

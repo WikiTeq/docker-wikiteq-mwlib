@@ -15,10 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install mwlib and other required libraries
-RUN pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl
+RUN pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl==0.14.5
 
 VOLUME /var/cache/mwlib
 EXPOSE 8899
 
-#CMD ["/bin/bash", "-c", "nserve & mw-qserve & nslave --cachedir /var/cache/mwlib & postman --cachedir /var/cache/mwlib"]
 CMD ["/bin/bash", "-c", "nserve & mw-qserve & nslave --cachedir /var/cache/mwlib"]

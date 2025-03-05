@@ -17,6 +17,8 @@ RUN apt-get update  \
     libncurses-dev \
     libffi-dev \
     pdftk \
+    # Required for Pillow
+    libjpeg-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install mwlib and other required libraries

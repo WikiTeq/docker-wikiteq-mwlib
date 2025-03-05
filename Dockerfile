@@ -15,6 +15,7 @@ RUN apt-get update  \
     libxslt1-dev \
     zlib1g-dev \
     libncurses-dev \
+    libffi-dev \
     pdftk \
     && rm -rf /var/lib/apt/lists/*
 

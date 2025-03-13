@@ -46,9 +46,7 @@ ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
 
 # Install mwlib and other required libraries with specific versions
-RUN pip install --no-cache-dir pillow==6.2.2 \
-    && pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl==0.14.5 \
-    && pip install --no-cache-dir --no-binary :all: pyfribidi==0.12.0
+RUN pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl==0.14.5 pyfribidi==0.12.0 pillow==6.2.2
 
 # Create font symlinks
 RUN mkdir -p /usr/share/fonts/truetype/custom \

@@ -38,7 +38,10 @@ RUN apt-get update  \
     fonts-tlwg-garuda \
     fonts-tlwg-garuda-ttf \
     fonts-sil-padauk \
+    # Latin fonts
+    fonts-liberation \
     && rm -rf /var/lib/apt/lists/* \
+    && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen en_US.UTF-8
 
 ENV LANG=en_US.UTF-8
@@ -47,6 +50,10 @@ ENV LC_ALL=en_US.UTF-8
 
 # Install mwlib and other required libraries with specific versions
 RUN pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl==0.14.5 pyfribidi==0.12.0 pillow==6.2.2
+
+# Fix Pillow/ReportLab compatibility issues
+RUN sed -i 's/self._data = im.tostring()/self._data = im.tobytes()/g' /usr/local/lib/python2.7/site-packages/mwlib/ext/reportlab/lib/utils.py && \
+    find /usr/local/lib/python2.7/site-packages/mwlib -type f -name "*.py" -exec sed -i 's/\.tostring()/\.tobytes()/g' {} +
 
 # Create font symlinks
 RUN mkdir -p /usr/share/fonts/truetype/custom \
@@ -65,6 +72,10 @@ RUN mkdir -p /usr/share/fonts/truetype/custom \
     && ln -s ../khmeros/KhmerOS.ttf custom/Khmer.ttf \
     && ln -s ../tlwg/Garuda.ttf custom/Arundina\ Serif.ttf \
     && ln -s ../tlwg/Garuda.ttf custom/LikhanNormal.ttf \
+    # Add Liberation font symlinks
+    && ln -s liberation/LiberationSans-Regular.ttf custom/Liberation\ Sans.ttf \
+    && ln -s liberation/LiberationSerif-Regular.ttf custom/Liberation\ Serif.ttf \
+    && ln -s liberation/LiberationMono-Regular.ttf custom/Liberation\ Mono.ttf \
     && fc-cache -f -v
 
 VOLUME /var/cache/mwlib

@@ -55,6 +55,10 @@ RUN pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl==0.14.5 pyfr
 RUN sed -i 's/self._data = im.tostring()/self._data = im.tobytes()/g' /usr/local/lib/python2.7/site-packages/mwlib/ext/reportlab/lib/utils.py && \
     find /usr/local/lib/python2.7/site-packages/mwlib -type f -name "*.py" -exec sed -i 's/\.tostring()/\.tobytes()/g' {} +
 
+# Fix Pillow PNG decompression limits
+RUN sed -i 's/MAX_TEXT_CHUNK = ImageFile.SAFEBLOCK/MAX_TEXT_CHUNK = 10 * 1024 * 1024/' /usr/local/lib/python2.7/site-packages/PIL/PngImagePlugin.py && \
+    sed -i 's/MAX_TEXT_MEMORY = 64 \* MAX_TEXT_CHUNK/MAX_TEXT_MEMORY = 128 * MAX_TEXT_CHUNK/' /usr/local/lib/python2.7/site-packages/PIL/PngImagePlugin.py
+
 # Create font symlinks
 RUN mkdir -p /usr/share/fonts/truetype/custom \
     && cd /usr/share/fonts/truetype \

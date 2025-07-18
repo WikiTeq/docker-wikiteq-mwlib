@@ -14,4 +14,6 @@ logging.getLogger('mwlib').setLevel(logging.INFO)
 logging.getLogger('mwlib.core.nslave').setLevel(logging.INFO)
 logging.getLogger('qs').setLevel(logging.INFO)
 
-print("Logging configured for mwlib components", file=sys.stderr)
+# Python 2 compatible print to stderr
+sys.stderr.write("Logging configured for mwlib components\n")
+sys.stderr.flush()

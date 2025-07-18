@@ -3,6 +3,11 @@ FROM python:2.7.18-slim
 # Ensures Python output is sent straight to the terminal (no buffering)
 ENV PYTHONUNBUFFERED=1
 
+# Point to the Debian Stretch archive repositories
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list \
+    && sed -i 's|security.debian.org/debian-security|archive.debian.org/debian-security|g' /etc/apt/sources.list \
+    && sed -i '/stretch-updates/d' /etc/apt/sources.list
+
 # Install prerequisite packages needed for mwlib
 RUN apt-get update  \
     && mkdir -p /usr/share/man/man1 \
@@ -86,4 +91,4 @@ VOLUME /var/cache/mwlib
 EXPOSE 8899
 
 # Start services
-CMD ["/bin/bash", "-c", "nserve & mw-qserve & nslave --cachedir /var/cache/mwlib"]
+CMD ["/bin/bash", "-c", "export PYTHONUNBUFFERED=1 && python -c \"import logging; logging.getLogger().setLevel(logging.INFO)\" && nserve & mw-qserve & nslave --cachedir /var/cache/mwlib"]

@@ -90,8 +90,5 @@ RUN mkdir -p /usr/share/fonts/truetype/custom \
 VOLUME /var/cache/mwlib
 EXPOSE 8899
 
-# Copy the logging setup script
-COPY setup_logging.py /usr/local/bin/setup_logging.py
-
 # Start services
-CMD ["/bin/bash", "-c", "export PYTHONUNBUFFERED=1 && python /usr/local/bin/setup_logging.py && nserve & mw-qserve & nslave --cachedir /var/cache/mwlib"]
+CMD ["/bin/bash", "-c", "export PYTHONUNBUFFERED=1 && python -c \"import logging; logging.getLogger().setLevel(logging.INFO)\" && nserve & mw-qserve & nslave --cachedir /var/cache/mwlib"]

@@ -56,6 +56,10 @@ ENV LC_ALL=en_US.UTF-8
 # Install mwlib and other required libraries with specific versions
 RUN pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl==0.14.5 pyfribidi==0.12.0 pillow==6.2.2
 
+# Configure Bottle's MEMFILE_MAX to support larger request bodies via BOTTLE_MEMFILE_MAX env var
+COPY patch_nserve.py /tmp/patch_nserve.py
+RUN python /tmp/patch_nserve.py && rm /tmp/patch_nserve.py
+
 # Fix Pillow/ReportLab compatibility issues
 RUN sed -i 's/self._data = im.tostring()/self._data = im.tobytes()/g' /usr/local/lib/python2.7/site-packages/mwlib/ext/reportlab/lib/utils.py && \
     find /usr/local/lib/python2.7/site-packages/mwlib -type f -name "*.py" -exec sed -i 's/\.tostring()/\.tobytes()/g' {} +

@@ -1,0 +1,41 @@
+--- nserve.py
++++ nserve.py
+@@ -172,7 +172,35 @@ def choose_idle_qserve():
+     return random.choice(idle)  # XXX probably store number of render jobs in busy
+ 
+ 
+-from bottle import request, default_app, post, get, HTTPResponse
++from bottle import request, default_app, post, get, HTTPResponse, error, BaseRequest
++import os
++
++# Configure Bottle's MEMFILE_MAX from environment variable
++# Default is 100KB (102400 bytes), but can be overridden via BOTTLE_MEMFILE_MAX env var
++# Value can be in bytes (e.g., 10485760) or with suffix (e.g., 10M, 50MB)
++memfile_max_str = os.getenv('BOTTLE_MEMFILE_MAX', '10M')
++try:
++    # Handle suffixes: K, M, G for KB, MB, GB
++    memfile_max_str = memfile_max_str.strip().upper()
++    if memfile_max_str.endswith('K'):
++        BaseRequest.MEMFILE_MAX = int(memfile_max_str[:-1]) * 1024
++    elif memfile_max_str.endswith('M'):
++        BaseRequest.MEMFILE_MAX = int(memfile_max_str[:-1]) * 1024 * 1024
++    elif memfile_max_str.endswith('G'):
++        BaseRequest.MEMFILE_MAX = int(memfile_max_str[:-1]) * 1024 * 1024 * 1024
++    elif memfile_max_str.endswith('KB'):
++        BaseRequest.MEMFILE_MAX = int(memfile_max_str[:-2]) * 1024
++    elif memfile_max_str.endswith('MB'):
++        BaseRequest.MEMFILE_MAX = int(memfile_max_str[:-2]) * 1024 * 1024
++    elif memfile_max_str.endswith('GB'):
++        BaseRequest.MEMFILE_MAX = int(memfile_max_str[:-2]) * 1024 * 1024 * 1024
++    else:
++        # Assume bytes if no suffix
++        BaseRequest.MEMFILE_MAX = int(memfile_max_str)
++except (ValueError, AttributeError):
++    # Fallback to 10MB if parsing fails
++    BaseRequest.MEMFILE_MAX = 10 * 1024 * 1024
++    log.warning("Invalid BOTTLE_MEMFILE_MAX value '%s', using default 10MB" % memfile_max_str)
++
++log.info("Bottle MEMFILE_MAX set to %d bytes (%d MB)" % (BaseRequest.MEMFILE_MAX, BaseRequest.MEMFILE_MAX / (1024 * 1024)))
++
++
++@get('<path:re:.*>')

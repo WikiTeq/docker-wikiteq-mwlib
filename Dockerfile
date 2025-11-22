@@ -21,6 +21,7 @@ RUN apt-get update  \
     zlib1g-dev \
     libncurses-dev \
     libffi-dev \
+    patch \
     pdftk \
     imagemagick \
     locales \
@@ -56,17 +57,13 @@ ENV LC_ALL=en_US.UTF-8
 # Install mwlib and other required libraries with specific versions
 RUN pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl==0.14.5 pyfribidi==0.12.0 pillow==6.2.2
 
-# Configure Bottle's MEMFILE_MAX to support larger request bodies via BOTTLE_MEMFILE_MAX env var
-COPY patch_nserve.py /tmp/patch_nserve.py
-RUN python /tmp/patch_nserve.py && rm /tmp/patch_nserve.py
-
-# Fix Pillow/ReportLab compatibility issues
-RUN sed -i 's/self._data = im.tostring()/self._data = im.tobytes()/g' /usr/local/lib/python2.7/site-packages/mwlib/ext/reportlab/lib/utils.py && \
-    find /usr/local/lib/python2.7/site-packages/mwlib -type f -name "*.py" -exec sed -i 's/\.tostring()/\.tobytes()/g' {} +
-
-# Fix Pillow PNG decompression limits
-RUN sed -i 's/MAX_TEXT_CHUNK = ImageFile.SAFEBLOCK/MAX_TEXT_CHUNK = 10 * 1024 * 1024/' /usr/local/lib/python2.7/site-packages/PIL/PngImagePlugin.py && \
-    sed -i 's/MAX_TEXT_MEMORY = 64 \* MAX_TEXT_CHUNK/MAX_TEXT_MEMORY = 128 * MAX_TEXT_CHUNK/' /usr/local/lib/python2.7/site-packages/PIL/PngImagePlugin.py
+# Apply all patches for source code modifications
+COPY patches/ /tmp/patches/
+RUN cd /usr/local/lib/python2.7/site-packages/mwlib && patch -p0 < /tmp/patches/nserve.patch && \
+    cd /usr/local/lib/python2.7/site-packages/PIL && patch -p0 < /tmp/patches/pngimageplugin.patch && \
+    sed -i 's/self._data = im.tostring()/self._data = im.tobytes()/g' /usr/local/lib/python2.7/site-packages/mwlib/ext/reportlab/lib/utils.py && \
+    find /usr/local/lib/python2.7/site-packages/mwlib -type f -name "*.py" -exec sed -i 's/\.tostring()/\.tobytes()/g' {} + && \
+    rm -rf /tmp/patches
 
 # Create font symlinks
 RUN mkdir -p /usr/share/fonts/truetype/custom \

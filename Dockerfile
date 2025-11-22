@@ -59,8 +59,10 @@ RUN pip install --no-cache-dir mwlib==0.16.2 qserve==0.2.8 mwlib.rl==0.14.5 pyfr
 
 # Apply all patches for source code modifications
 COPY patches/ /tmp/patches/
-RUN cd /usr/local/lib/python2.7/site-packages/mwlib && patch -p0 < /tmp/patches/nserve.patch && \
-    cd /usr/local/lib/python2.7/site-packages/PIL && patch -p0 < /tmp/patches/pngimageplugin.patch && \
+RUN cd /usr/local/lib/python2.7/site-packages/mwlib && \
+    patch -p0 < /tmp/patches/nserve.patch || (echo "Failed to apply nserve.patch" && cat /tmp/patches/nserve.patch && exit 1) && \
+    cd /usr/local/lib/python2.7/site-packages/PIL && \
+    patch -p0 < /tmp/patches/pngimageplugin.patch || (echo "Failed to apply pngimageplugin.patch" && exit 1) && \
     sed -i 's/self._data = im.tostring()/self._data = im.tobytes()/g' /usr/local/lib/python2.7/site-packages/mwlib/ext/reportlab/lib/utils.py && \
     find /usr/local/lib/python2.7/site-packages/mwlib -type f -name "*.py" -exec sed -i 's/\.tostring()/\.tobytes()/g' {} + && \
     rm -rf /tmp/patches

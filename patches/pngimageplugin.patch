@@ -1,0 +1,16 @@
+--- PngImagePlugin.py
++++ PngImagePlugin.py
+--- PngImagePlugin.py
++++ PngImagePlugin.py
+@@ -81,9 +81,9 @@
+ 
+ # Maximum decompressed size for a iTXt or zTXt chunk.
+ # Eliminates decompression bombs where compressed chunks can expand 1000x
+-MAX_TEXT_CHUNK = ImageFile.SAFEBLOCK
++MAX_TEXT_CHUNK = 10 * 1024 * 1024
+ # Set the maximum total text chunk size.
+-MAX_TEXT_MEMORY = 64 * MAX_TEXT_CHUNK
++MAX_TEXT_MEMORY = 128 * MAX_TEXT_CHUNK
+ 
+ 
+ def _safe_zlib_decompress(s):

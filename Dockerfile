@@ -67,28 +67,69 @@ RUN cd /usr/local/lib/python2.7/site-packages/mwlib && \
     find /usr/local/lib/python2.7/site-packages/mwlib -type f -name "*.py" -exec sed -i 's/\.tostring()/\.tobytes()/g' {} + && \
     rm -rf /tmp/patches
 
-# Create font symlinks
-RUN mkdir -p /usr/share/fonts/truetype/custom \
-    && cd /usr/share/fonts/truetype \
-    && ln -s ../arphic/uming.ttc custom/AR\ PL\ UMing\ HK.ttf \
-    && ln -s ../farsiweb/nazli.ttf custom/Nazli.ttf \
-    && ln -s ../unfonts-core/UnBatang.ttf custom/UnBatang.ttf \
-    && ln -s ../lohit-telugu/Lohit-Telugu.ttf custom/Lohit\ Telugu.ttf \
-    && ln -s ../Sarai/Sarai.ttf custom/Sarai.ttf \
-    && ln -s ../lohit-gujarati/Lohit-Gujarati.ttf custom/Gujarati.ttf \
-    && ln -s ../lohit-punjabi/Lohit-Punjabi.ttf custom/Lohit\ Punjabi.ttf \
-    && ln -s ../lohit-oriya/Lohit-Oriya.ttf custom/Lohit\ Oriya.ttf \
-    && ln -s ../malayalam/AnjaliOldLipi.ttf custom/AnjaliOldLipi.ttf \
-    && ln -s ../Gubbi/Gubbi.ttf custom/Kedage.ttf \
-    && ln -s ../lohit-tamil/Lohit-Tamil.ttf custom/Lohit\ Tamil.ttf \
-    && ln -s ../khmeros/KhmerOS.ttf custom/Khmer.ttf \
-    && ln -s ../tlwg/Garuda.ttf custom/Arundina\ Serif.ttf \
-    && ln -s ../tlwg/Garuda.ttf custom/LikhanNormal.ttf \
-    # Add Liberation font symlinks
-    && ln -s liberation/LiberationSans-Regular.ttf custom/Liberation\ Sans.ttf \
-    && ln -s liberation/LiberationSerif-Regular.ttf custom/Liberation\ Serif.ttf \
-    && ln -s liberation/LiberationMono-Regular.ttf custom/Liberation\ Mono.ttf \
-    && fc-cache -f -v
+# mwlib.rl's stock fontconfig.py resolves fonts ONLY from its package dir and
+# ~/mwlibfonts/, using the legacy file_names below — it never scans
+# /usr/share/fonts. Populate /root/mwlibfonts/ accordingly (absolute paths so
+# the layout survives a future USER switch, failing loudly instead).
+# Sources verified present in python:2.7.18-slim (stretch archive) packages above.
+RUN set -e; F=/root/mwlibfonts; mkdir -p "$F"/customnazli "$F"/unfonts "$F"/ttf-thai-arundina \
+    "$F"/ttf-telugu-fonts "$F"/ttf-devanagari-fonts "$F"/ttf-indic-fonts-core \
+    "$F"/ttf-oriya-fonts "$F"/ttf-malayalam-fonts "$F"/ttf-kannada-fonts \
+    "$F"/ttf-bengali-fonts "$F"/ttf-khmeros-core "$F"/arphic "$F"/customliberation \
+    /usr/share/fonts/truetype/custom \
+    && ln -sf /usr/share/fonts/truetype/farsiweb/nazli.ttf "$F"/customnazli/nazli.ttf \
+    && ln -sf /usr/share/fonts/truetype/farsiweb/nazli.ttf "$F"/customnazli/nazli-italic.ttf \
+    && ln -sf /usr/share/fonts/truetype/farsiweb/nazlib.ttf "$F"/customnazli/nazlib.ttf \
+    && ln -sf /usr/share/fonts/truetype/farsiweb/nazlib.ttf "$F"/customnazli/nazlib-italic.ttf \
+    && ln -sf /usr/share/fonts/truetype/unfonts-core/UnBatang.ttf "$F"/unfonts/UnBatang.ttf \
+    && ln -sf /usr/share/fonts/truetype/tlwg/Garuda.ttf "$F"/ttf-thai-arundina/ArundinaSans.ttf \
+    && ln -sf /usr/share/fonts/truetype/tlwg/Garuda-Bold.ttf "$F"/ttf-thai-arundina/ArundinaSans-Bold.ttf \
+    && ln -sf /usr/share/fonts/truetype/tlwg/Garuda-Oblique.ttf "$F"/ttf-thai-arundina/ArundinaSans-Oblique.ttf \
+    && ln -sf /usr/share/fonts/truetype/tlwg/Garuda-BoldOblique.ttf "$F"/ttf-thai-arundina/ArundinaSans-BoldOblique.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-telugu/Lohit-Telugu.ttf "$F"/ttf-telugu-fonts/lohit_te.ttf \
+    && ln -sf /usr/share/fonts/truetype/Sarai/Sarai.ttf "$F"/ttf-devanagari-fonts/Sarai_07.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-gujarati/Lohit-Gujarati.ttf "$F"/ttf-indic-fonts-core/lohit_gu.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-punjabi/Lohit-Gurmukhi.ttf "$F"/ttf-indic-fonts-core/lohit_pa.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-tamil/Lohit-Tamil.ttf "$F"/ttf-indic-fonts-core/lohit_ta.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-oriya/Lohit-Odia.ttf "$F"/ttf-oriya-fonts/lohit_or.ttf \
+    && ln -sf /usr/share/fonts/truetype/malayalam/AnjaliOldLipi-Regular.ttf "$F"/ttf-malayalam-fonts/AnjaliOldLipi.ttf \
+    && ln -sf /usr/share/fonts/truetype/Gubbi/Gubbi.ttf "$F"/ttf-kannada-fonts/Kedage-n.ttf \
+    && ln -sf /usr/share/fonts/truetype/Gubbi/Gubbi.ttf "$F"/ttf-kannada-fonts/Kedage-b.ttf \
+    && ln -sf /usr/share/fonts/truetype/Gubbi/Gubbi.ttf "$F"/ttf-kannada-fonts/Kedage-i.ttf \
+    && ln -sf /usr/share/fonts/truetype/Gubbi/Gubbi.ttf "$F"/ttf-kannada-fonts/Kedage-t.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-bengali/Lohit-Bengali.ttf "$F"/ttf-bengali-fonts/LikhanNormal.ttf \
+    && ln -sf /usr/share/fonts/truetype/khmeros/KhmerOS.ttf "$F"/ttf-khmeros-core/KhmerOS.ttf \
+    && ln -sf /usr/share/fonts/truetype/arphic/uming.ttc "$F"/arphic/uming.ttc \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf "$F"/customliberation/Liberation\ Sans.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf "$F"/customliberation/Liberation\ Sans-Bold.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSans-Italic.ttf "$F"/customliberation/Liberation\ Sans-Italic.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSans-BoldItalic.ttf "$F"/customliberation/Liberation\ Sans-BoldItalic.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf "$F"/customliberation/Liberation\ Serif.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf "$F"/customliberation/Liberation\ Serif-Bold.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSerif-Italic.ttf "$F"/customliberation/Liberation\ Serif-Italic.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf "$F"/customliberation/Liberation\ Serif-BoldItalic.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf "$F"/customliberation/Liberation\ Mono.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationMono-Bold.ttf "$F"/customliberation/Liberation\ Mono-Bold.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationMono-Italic.ttf "$F"/customliberation/Liberation\ Mono-Italic.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationMono-BoldItalic.ttf "$F"/customliberation/Liberation\ Mono-BoldItalic.ttf \
+    && ln -sf /usr/share/fonts/truetype/arphic/uming.ttc "/usr/share/fonts/truetype/custom/AR PL UMing HK.ttf" \
+    && ln -sf /usr/share/fonts/truetype/farsiweb/nazli.ttf /usr/share/fonts/truetype/custom/Nazli.ttf \
+    && ln -sf /usr/share/fonts/truetype/unfonts-core/UnBatang.ttf /usr/share/fonts/truetype/custom/UnBatang.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-telugu/Lohit-Telugu.ttf "/usr/share/fonts/truetype/custom/Lohit Telugu.ttf" \
+    && ln -sf /usr/share/fonts/truetype/Sarai/Sarai.ttf /usr/share/fonts/truetype/custom/Sarai.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-gujarati/Lohit-Gujarati.ttf /usr/share/fonts/truetype/custom/Gujarati.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-punjabi/Lohit-Gurmukhi.ttf "/usr/share/fonts/truetype/custom/Lohit Punjabi.ttf" \
+    && ln -sf /usr/share/fonts/truetype/lohit-oriya/Lohit-Odia.ttf "/usr/share/fonts/truetype/custom/Lohit Oriya.ttf" \
+    && ln -sf /usr/share/fonts/truetype/malayalam/AnjaliOldLipi-Regular.ttf /usr/share/fonts/truetype/custom/AnjaliOldLipi.ttf \
+    && ln -sf /usr/share/fonts/truetype/Gubbi/Gubbi.ttf /usr/share/fonts/truetype/custom/Kedage.ttf \
+    && ln -sf /usr/share/fonts/truetype/lohit-tamil/Lohit-Tamil.ttf "/usr/share/fonts/truetype/custom/Lohit Tamil.ttf" \
+    && ln -sf /usr/share/fonts/truetype/khmeros/KhmerOS.ttf /usr/share/fonts/truetype/custom/Khmer.ttf \
+    && ln -sf /usr/share/fonts/truetype/tlwg/Garuda.ttf "/usr/share/fonts/truetype/custom/Arundina Serif.ttf" \
+    && ln -sf /usr/share/fonts/truetype/tlwg/Garuda.ttf /usr/share/fonts/truetype/custom/LikhanNormal.ttf \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf "/usr/share/fonts/truetype/custom/Liberation Sans.ttf" \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf "/usr/share/fonts/truetype/custom/Liberation Serif.ttf" \
+    && ln -sf /usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf "/usr/share/fonts/truetype/custom/Liberation Mono.ttf" \
+    && fc-cache -f
 
 VOLUME /var/cache/mwlib
 EXPOSE 8899
